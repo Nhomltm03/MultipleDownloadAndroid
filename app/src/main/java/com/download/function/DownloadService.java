@@ -280,7 +280,7 @@ public class DownloadService extends Service {
      * start dispatch download queue.
      */
     private void startDispatch() {
-        disposable = Observable
+        this.disposable = Observable
                 .create((ObservableOnSubscribe<DownloadMission>) emitter -> {
                     DownloadMission mission;
                     while (!emitter.isDisposed()) {
@@ -297,7 +297,7 @@ public class DownloadService extends Service {
                     emitter.onComplete();
                 })
                 .subscribeOn(Schedulers.newThread())
-                .subscribe(mission -> mission.start(semaphore), Utils::log);
+                .subscribe(mission -> mission.start(this.semaphore), Utils::log);
     }
 
     /**

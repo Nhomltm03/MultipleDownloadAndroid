@@ -12,6 +12,6 @@ public class DownloadRange {
     }
 
     public boolean legal() {
-        return start <= end;
+        return this.start <= this.end;
     }
 }

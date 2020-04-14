@@ -149,12 +149,14 @@ public class SingleMission extends DownloadMission {
         if (this.processor != null) {
             this.processor.onNext(normal(null));
         }
+
         if (deleteFile) {
             DownloadRecord record = dataBaseHelper.readSingleRecord(getUrl());
             if (record != null) {
                 deleteFiles(getFiles(record.getSaveName(), record.getSavePath()));
             }
         }
+
         dataBaseHelper.deleteRecord(getUrl());
     }
 

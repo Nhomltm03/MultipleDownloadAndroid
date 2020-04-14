@@ -45,14 +45,11 @@ public class FileHelper {
     }
 
     public void prepareDownload(File lastModifyFile, File saveFile, long fileLength, String lastModify) throws IOException, ParseException {
-
-        writeLastModify(lastModifyFile, lastModify);
-        prepareFile(saveFile, fileLength);
+        this.writeLastModify(lastModifyFile, lastModify);
+        this.prepareFile(saveFile, fileLength);
     }
 
-    public void saveFile(FlowableEmitter<DownloadStatus> emitter, File saveFile,
-                         Response<ResponseBody> resp) {
-
+    public void saveFile(FlowableEmitter<DownloadStatus> emitter, File saveFile, Response<ResponseBody> resp) {
         InputStream inputStream = null;
         OutputStream outputStream = null;
         try {
@@ -65,6 +62,7 @@ public class FileHelper {
                 if (resp.body() != null) {
                     inputStream = resp.body().byteStream();
                 }
+
                 outputStream = new FileOutputStream(saveFile);
 
                 long contentLength = 0;
@@ -100,17 +98,12 @@ public class FileHelper {
         }
     }
 
-    public void prepareDownload(File lastModifyFile, File tempFile, File saveFile,
-                                long fileLength, String lastModify)
-            throws IOException, ParseException {
-
-        writeLastModify(lastModifyFile, lastModify);
-        prepareFile(tempFile, saveFile, fileLength);
+    public void prepareDownload(File lastModifyFile, File tempFile, File saveFile, long fileLength, String lastModify) throws IOException, ParseException {
+        this.writeLastModify(lastModifyFile, lastModify);
+        this.prepareFile(tempFile, saveFile, fileLength);
     }
 
-    public void saveFile(FlowableEmitter<DownloadStatus> emitter, int i, File tempFile,
-                         File saveFile, ResponseBody response) {
-
+    public void saveFile(FlowableEmitter<DownloadStatus> emitter, int i, File tempFile, File saveFile, ResponseBody response) {
         RandomAccessFile record = null;
         FileChannel recordChannel = null;
         RandomAccessFile save = null;
@@ -125,17 +118,12 @@ public class FileHelper {
                 record = new RandomAccessFile(tempFile, ACCESS);
                 recordChannel = record.getChannel();
                 MappedByteBuffer recordBuffer = recordChannel.map(READ_WRITE, 0, RECORD_FILE_TOTAL_SIZE);
-
                 int startIndex = i * EACH_RECORD_SIZE;
-
                 long start = recordBuffer.getLong(startIndex);
-
                 long totalSize = recordBuffer.getLong(RECORD_FILE_TOTAL_SIZE - 8) + 1;
                 status.setTotalSize(totalSize);
-
                 save = new RandomAccessFile(saveFile, ACCESS);
                 saveChannel = save.getChannel();
-
                 inStream = response.byteStream();
 
                 while ((readLen = inStream.read(buffer)) != -1 && !emitter.isCancelled()) {
@@ -143,10 +131,10 @@ public class FileHelper {
                     start += readLen;
                     saveBuffer.put(buffer, 0, readLen);
                     recordBuffer.putLong(startIndex, start);
-
                     status.setDownloadSize(totalSize - getResidue(recordBuffer));
                     emitter.onNext(status);
                 }
+
                 emitter.onComplete();
             } finally {
                 closeQuietly(record);
@@ -236,10 +224,10 @@ public class FileHelper {
         FileChannel channel = null;
         try {
             rFile = new RandomAccessFile(saveFile, ACCESS);
-            rFile.setLength(fileLength);//设置下载文件的长度
+            rFile.setLength(fileLength);
 
             rRecord = new RandomAccessFile(tempFile, ACCESS);
-            rRecord.setLength(RECORD_FILE_TOTAL_SIZE); //设置指针记录文件的大小
+            rRecord.setLength(RECORD_FILE_TOTAL_SIZE);
 
             channel = rRecord.getChannel();
             MappedByteBuffer buffer = channel.map(READ_WRITE, 0, RECORD_FILE_TOTAL_SIZE);
@@ -271,10 +259,9 @@ public class FileHelper {
         try {
             file = new RandomAccessFile(saveFile, ACCESS);
             if (fileLength != -1) {
-                file.setLength(fileLength);//设置下载文件的长度
+                file.setLength(fileLength);
             } else {
                 log(CHUNKED_DOWNLOAD_HINT);
-                //Chunked 下载, 无需设置文件大小.
             }
         } finally {
             closeQuietly(file);

@@ -27,15 +27,15 @@ public class TemporaryRecordTable {
     }
 
     public void add(String url, TemporaryRecord record) {
-        map.put(url, record);
+        this.map.put(url, record);
     }
 
     public boolean contain(String url) {
-        return map.get(url) != null;
+        return this.map.get(url) != null;
     }
 
     public void delete(String url) {
-        map.remove(url);
+        this.map.remove(url);
     }
 
     /**
@@ -45,10 +45,12 @@ public class TemporaryRecordTable {
      * @param response response
      */
     public void saveFileInfo(String url, Response<?> response) {
-        TemporaryRecord record = map.get(url);
+        TemporaryRecord record = this.map.get(url);
+
         if (empty(record.getSaveName())) {
             record.setSaveName(fileName(url, response));
         }
+
         record.setContentLength(contentLength(response));
         record.setLastModify(lastModify(response));
     }
@@ -60,7 +62,7 @@ public class TemporaryRecordTable {
      * @param response response
      */
     public void saveRangeInfo(String url, Response<?> response) {
-        map.get(url).setRangeSupport(!notSupportRange(response));
+        this.map.get(url).setRangeSupport(!notSupportRange(response));
     }
 
     /**
@@ -73,9 +75,8 @@ public class TemporaryRecordTable {
      * @param downloadApi     api
      * @param dataBaseHelper  DataBaseHelper
      */
-    public void init(String url, int maxThreads, int maxRetryCount, String defaultSavePath,
-                     DownloadApi downloadApi, DataBaseHelper dataBaseHelper) {
-        map.get(url).init(maxThreads, maxRetryCount, defaultSavePath, downloadApi, dataBaseHelper);
+    public void init(String url, int maxThreads, int maxRetryCount, String defaultSavePath, DownloadApi downloadApi, DataBaseHelper dataBaseHelper) {
+        this.map.get(url).init(maxThreads, maxRetryCount, defaultSavePath, downloadApi, dataBaseHelper);
     }
 
     /**
@@ -86,9 +87,9 @@ public class TemporaryRecordTable {
      */
     public void saveFileState(String url, Response<Void> response) {
         if (response.code() == 304) {
-            map.get(url).setFileChanged(false);
+            this.map.get(url).setFileChanged(false);
         } else if (response.code() == 200) {
-            map.get(url).setFileChanged(true);
+            this.map.get(url).setFileChanged(true);
         }
     }
 
@@ -126,7 +127,7 @@ public class TemporaryRecordTable {
      */
     public String readLastModify(String url) {
         try {
-            return map.get(url).readLastModify();
+            return this.map.get(url).readLastModify();
         } catch (IOException e) {
             //TODO log
             //If read failed,return an empty string.
@@ -137,76 +138,76 @@ public class TemporaryRecordTable {
     }
 
     public boolean fileExists(String url) {
-        return map.get(url).file().exists();
+        return this.map.get(url).file().exists();
     }
 
     public File[] getFiles(String url) {
-        return map.get(url).getFiles();
+        return this.map.get(url).getFiles();
     }
 
     private boolean supportRange(String url) {
-        return map.get(url).isSupportRange();
+        return this.map.get(url).isSupportRange();
     }
 
     private boolean fileChanged(String url) {
-        return map.get(url).isFileChanged();
+        return this.map.get(url).isFileChanged();
     }
 
     private DownloadType getNormalType(String url) {
         DownloadType type;
-        if (supportRange(url)) {
-            type = new DownloadType.MultiThreadDownload(map.get(url));
+        if (this.supportRange(url)) {
+            type = new DownloadType.MultiThreadDownload(this.map.get(url));
         } else {
-            type = new DownloadType.NormalDownload(map.get(url));
+            type = new DownloadType.NormalDownload(this.map.get(url));
         }
         return type;
     }
 
     private DownloadType getServerFileChangeType(String url) {
-        if (supportRange(url)) {
-            return supportRangeType(url);
+        if (this.supportRange(url)) {
+            return this.supportRangeType(url);
         } else {
-            return notSupportRangeType(url);
+            return this.notSupportRangeType(url);
         }
     }
 
     private DownloadType supportRangeType(String url) {
-        if (needReDownload(url)) {
-            return new DownloadType.MultiThreadDownload(map.get(url));
+        if (this.needReDownload(url)) {
+            return new DownloadType.MultiThreadDownload(this.map.get(url));
         }
         try {
-            if (multiDownloadNotComplete(url)) {
-                return new DownloadType.ContinueDownload(map.get(url));
+            if (this.multiDownloadNotComplete(url)) {
+                return new DownloadType.ContinueDownload(this.map.get(url));
             }
         } catch (IOException e) {
-            return new DownloadType.MultiThreadDownload(map.get(url));
+            return new DownloadType.MultiThreadDownload(this.map.get(url));
         }
-        return new DownloadType.AlreadyDownloaded(map.get(url));
+        return new DownloadType.AlreadyDownloaded(this.map.get(url));
     }
 
     private DownloadType notSupportRangeType(String url) {
-        if (normalDownloadNotComplete(url)) {
-            return new DownloadType.NormalDownload(map.get(url));
+        if (this.normalDownloadNotComplete(url)) {
+            return new DownloadType.NormalDownload(this.map.get(url));
         } else {
-            return new DownloadType.AlreadyDownloaded(map.get(url));
+            return new DownloadType.AlreadyDownloaded(this.map.get(url));
         }
     }
 
     private boolean multiDownloadNotComplete(String url) throws IOException {
-        return map.get(url).fileNotComplete();
+        return this.map.get(url).fileNotComplete();
     }
 
     private boolean normalDownloadNotComplete(String url) {
-        return !map.get(url).fileComplete();
+        return !this.map.get(url).fileComplete();
     }
 
     private boolean needReDownload(String url) {
-        return tempFileNotExists(url) || tempFileDamaged(url);
+        return this.tempFileNotExists(url) || this.tempFileDamaged(url);
     }
 
     private boolean tempFileDamaged(String url) {
         try {
-            return map.get(url).tempFileDamaged();
+            return this.map.get(url).tempFileDamaged();
         } catch (IOException e) {
             log(DOWNLOAD_RECORD_FILE_DAMAGED);
             return true;
@@ -214,6 +215,6 @@ public class TemporaryRecordTable {
     }
 
     private boolean tempFileNotExists(String url) {
-        return !map.get(url).tempFile().exists();
+        return !this.map.get(url).tempFile().exists();
     }
 }

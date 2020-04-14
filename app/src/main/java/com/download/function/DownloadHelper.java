@@ -50,7 +50,7 @@ public class DownloadHelper {
     }
 
     public void setRetrofit(Retrofit retrofit) {
-        downloadApi = retrofit.create(DownloadApi.class);
+        this.downloadApi = retrofit.create(DownloadApi.class);
     }
 
     public void setDefaultSavePath(String defaultSavePath) {
@@ -171,7 +171,7 @@ public class DownloadHelper {
      * @return empty
      */
     private ObservableSource<Object> checkUrl(final String url) {
-        return downloadApi.check(url)
+        return this.downloadApi.check(url)
                 .flatMap((Function<Response<Void>, ObservableSource<Object>>) resp -> {
                     if (!resp.isSuccessful()) {
                         return checkUrlByGet(url);
@@ -184,7 +184,7 @@ public class DownloadHelper {
 
     private ObservableSource<Object> saveFileInfo(final String url, final Response<Void> resp) {
         return Observable.create(emitter -> {
-            recordTable.saveFileInfo(url, resp);
+            this.recordTable.saveFileInfo(url, resp);
             emitter.onNext(new Object());
             emitter.onComplete();
         });
@@ -196,7 +196,7 @@ public class DownloadHelper {
                     if (!response.isSuccessful()) {
                         throw new IllegalArgumentException(formatStr(URL_ILLEGAL, url));
                     } else {
-                        recordTable.saveFileInfo(url, response);
+                        this.recordTable.saveFileInfo(url, response);
                     }
                 })
                 .map(response -> new Object())

@@ -50,32 +50,32 @@ public abstract class DownloadType {
     }
 
     public void prepareDownload() throws IOException, ParseException {
-        log(prepareLog());
+        log(this.prepareLog());
     }
 
     public Observable<DownloadStatus> startDownload() {
         return Flowable.just(1)
                 .doOnSubscribe(subscription -> {
                     log(startLog());
-                    record.start();
+                    this.record.start();
                 })
-                .flatMap((Function<Integer, Publisher<DownloadStatus>>) integer -> download())
+                .flatMap((Function<Integer, Publisher<DownloadStatus>>) integer -> this.download())
                 .doOnNext(status -> record.update(status))
                 .doOnError(throwable -> {
-                    log(errorLog());
-                    record.error();
+                    log(this.errorLog());
+                    this.record.error();
                 })
                 .doOnComplete(() -> {
-                    log(completeLog());
-                    record.complete();
+                    log(this.completeLog());
+                    this.record.complete();
                 })
                 .doOnCancel(() -> {
-                    log(cancelLog());
-                    record.cancel();
+                    log(this.cancelLog());
+                    this.record.cancel();
                 })
                 .doFinally(() -> {
-                    log(finishLog());
-                    record.finish();
+                    log(this.finishLog());
+                    this.record.finish();
                 })
                 .toObservable();
     }
@@ -115,12 +115,12 @@ public abstract class DownloadType {
         @Override
         public void prepareDownload() throws IOException, ParseException {
             super.prepareDownload();
-            record.prepareNormalDownload();
+            this.record.prepareNormalDownload();
         }
 
         @Override
         protected Publisher<DownloadStatus> download() {
-            return record.download()
+            return this.record.download()
                     .flatMap((Function<Response<ResponseBody>, Publisher<DownloadStatus>>) this::save)
                     .compose(Utils.retry2(NORMAL_RETRY_HINT, record.getMaxRetryCount()));
         }
@@ -156,7 +156,7 @@ public abstract class DownloadType {
         }
 
         private Publisher<DownloadStatus> save(final Response<ResponseBody> response) {
-            return Flowable.create(e -> record.save(e, response), BackpressureStrategy.LATEST);
+            return Flowable.create(e -> this.record.save(e, response), BackpressureStrategy.LATEST);
         }
     }
 
@@ -169,8 +169,8 @@ public abstract class DownloadType {
         @Override
         protected Publisher<DownloadStatus> download() {
             List<Publisher<DownloadStatus>> tasks = new ArrayList<>();
-            for (int i = 0; i < record.getMaxThreads(); i++) {
-                tasks.add(rangeDownload(i));
+            for (int i = 0; i < this.record.getMaxThreads(); i++) {
+                tasks.add(this.rangeDownload(i));
             }
             return Flowable.mergeDelayError(tasks);
         }
@@ -240,7 +240,7 @@ public abstract class DownloadType {
         @Override
         public void prepareDownload() throws IOException, ParseException {
             super.prepareDownload();
-            record.prepareRangeDownload();
+            this.record.prepareRangeDownload();
         }
 
         @Override
@@ -282,7 +282,7 @@ public abstract class DownloadType {
 
         @Override
         protected Publisher<DownloadStatus> download() {
-            return Flowable.just(new DownloadStatus(record.getContentLength(), record.getContentLength()));
+            return Flowable.just(new DownloadStatus(this.record.getContentLength(), this.record.getContentLength()));
         }
 
         @Override

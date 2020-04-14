@@ -5,8 +5,6 @@ import android.util.Log;
 
 import com.download.entity.DownloadEvent;
 
-import org.reactivestreams.Publisher;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -24,10 +22,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.reactivex.Flowable;
 import io.reactivex.FlowableTransformer;
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.processors.BehaviorProcessor;
@@ -107,10 +102,14 @@ public class Utils {
         if (GMT == null || "".equals(GMT)) {
             return new Date().getTime();
         }
+
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
         sdf.setTimeZone(getTimeZone("GMT"));
         Date date = sdf.parse(GMT);
-        return date.getTime();
+        if (date != null) {
+            return date.getTime();
+        }
+        return 0;
     }
 
     public static void close(Closeable closeable) throws IOException {
@@ -130,33 +129,20 @@ public class Utils {
         }
     }
 
-    public static FlowableProcessor<DownloadEvent> createProcessor(
-            String missionId, Map<String, FlowableProcessor<DownloadEvent>> processorMap) {
-
+    public static FlowableProcessor<DownloadEvent> createProcessor(String missionId, Map<String, FlowableProcessor<DownloadEvent>> processorMap) {
         if (processorMap.get(missionId) == null) {
-            FlowableProcessor<DownloadEvent> processor =
-                    BehaviorProcessor.<DownloadEvent>create().toSerialized();
+            FlowableProcessor<DownloadEvent> processor = BehaviorProcessor.<DownloadEvent>create().toSerialized();
             processorMap.put(missionId, processor);
         }
         return processorMap.get(missionId);
     }
 
     public static <U> ObservableTransformer<U, U> retry(final String hint, final int retryCount) {
-        return new ObservableTransformer<U, U>() {
-            @Override
-            public ObservableSource<U> apply(Observable<U> upstream) {
-                return upstream.retry((io.reactivex.functions.BiPredicate<? super Integer, ? super Throwable>) (integer, throwable) -> retry(hint, retryCount, integer, throwable));
-            }
-        };
+        return upstream -> upstream.retry((io.reactivex.functions.BiPredicate<? super Integer, ? super Throwable>) (integer, throwable) -> retry(hint, retryCount, integer, throwable));
     }
 
     public static <U> FlowableTransformer<U, U> retry2(final String hint, final int retryCount) {
-        return new FlowableTransformer<U, U>() {
-            @Override
-            public Publisher<U> apply(Flowable<U> upstream) {
-                return upstream.retry((io.reactivex.functions.BiPredicate<? super Integer, ? super Throwable>) (integer, throwable) -> retry(hint, retryCount, integer, throwable));
-            }
-        };
+        return upstream -> upstream.retry((io.reactivex.functions.BiPredicate<? super Integer, ? super Throwable>) (integer, throwable) -> retry(hint, retryCount, integer, throwable));
     }
 
     public static void dispose(Disposable disposable) {

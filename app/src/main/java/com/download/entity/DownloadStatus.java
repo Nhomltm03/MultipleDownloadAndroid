@@ -68,11 +68,11 @@ public class DownloadStatus implements Parcelable {
      * @return example: 2KB , 10MB
      */
     public String getFormatTotalSize() {
-        return formatSize(totalSize);
+        return formatSize(this.totalSize);
     }
 
     public String getFormatDownloadSize() {
-        return formatSize(downloadSize);
+        return formatSize(this.downloadSize);
     }
 
     /**
@@ -91,7 +91,7 @@ public class DownloadStatus implements Parcelable {
      */
     public String getPercent() {
         String percent;
-        Double result;
+        double result;
         if (totalSize == 0L) {
             result = 0.0;
         } else {
@@ -110,10 +110,10 @@ public class DownloadStatus implements Parcelable {
      */
     public long getPercentNumber() {
         double result;
-        if (totalSize == 0L) {
+        if (this.totalSize == 0L) {
             result = 0.0;
         } else {
-            result = downloadSize * 1.0 / totalSize;
+            result = this.downloadSize * 1.0 / this.totalSize;
         }
         return (long) (result * 100);
     }

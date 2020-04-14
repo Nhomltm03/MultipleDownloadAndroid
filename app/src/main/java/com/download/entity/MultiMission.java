@@ -65,8 +65,7 @@ public class MultiMission extends DownloadMission {
     }
 
     @Override
-    public void init(Map<String, DownloadMission> missionMap,
-                     Map<String, FlowableProcessor<DownloadEvent>> processorMap) {
+    public void init(Map<String, DownloadMission> missionMap, Map<String, FlowableProcessor<DownloadEvent>> processorMap) {
         DownloadMission mission = missionMap.get(getUrl());
         if (mission == null) {
             missionMap.put(getUrl(), this);
@@ -97,7 +96,7 @@ public class MultiMission extends DownloadMission {
         for (SingleMission each : missions) {
             each.sendWaitingEvent(dataBaseHelper);
         }
-        processor.onNext(waiting(null));
+        this.processor.onNext(waiting(null));
     }
 
     @Override

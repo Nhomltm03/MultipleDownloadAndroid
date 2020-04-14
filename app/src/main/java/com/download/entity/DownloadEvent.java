@@ -6,7 +6,7 @@ public class DownloadEvent {
     private Throwable mError;
 
     public int getFlag() {
-        return flag;
+        return this.flag;
     }
 
     public void setFlag(int flag) {
@@ -14,7 +14,7 @@ public class DownloadEvent {
     }
 
     public DownloadStatus getDownloadStatus() {
-        return downloadStatus;
+        return this.downloadStatus;
     }
 
     public void setDownloadStatus(DownloadStatus downloadStatus) {
@@ -22,10 +22,10 @@ public class DownloadEvent {
     }
 
     public Throwable getError() {
-        return mError;
+        return this.mError;
     }
 
     public void setError(Throwable error) {
-        mError = error;
+        this.mError = error;
     }
 }

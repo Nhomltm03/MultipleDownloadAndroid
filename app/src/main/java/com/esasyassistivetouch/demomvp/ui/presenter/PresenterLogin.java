@@ -1,5 +1,6 @@
 package com.esasyassistivetouch.demomvp.ui.presenter;
 
+import com.download.RxDownload;
 import com.esasyassistivetouch.demomvp.ui.inter.IPresenterListener;
 import com.esasyassistivetouch.demomvp.ui.inter.IViewListener;
 import com.esasyassistivetouch.demomvp.ui.model.ModelLogin;
@@ -20,7 +21,8 @@ public class PresenterLogin implements IPresenterListener {
     }
 
     public void reciveHandleDownload(String url){
-        this.modelLogin.startDownload(url);
+//        this.modelLogin.startDownload(url);
+        RxDownload.getInstance().download()
     }
 
     @Override

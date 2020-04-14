@@ -78,13 +78,13 @@ public class TemporaryRecord {
         } else {
             realSavePath = this.bean.getSavePath();
         }
+
         String cachePath = concat(realSavePath, separator, CACHE).toString();
         mkdirs(realSavePath, cachePath);
-
         String[] paths = getPaths(this.bean.getSaveName(), realSavePath);
-        filePath = paths[0];
-        tempPath = paths[1];
-        lmfPath = paths[2];
+        this.filePath = paths[0];
+        this.tempPath = paths[1];
+        this.lmfPath = paths[2];
     }
 
 
@@ -95,7 +95,7 @@ public class TemporaryRecord {
      * @throws ParseException
      */
     public void prepareNormalDownload() throws IOException, ParseException {
-        fileHelper.prepareDownload(lastModifyFile(), file(), contentLength, lastModify);
+        this.fileHelper.prepareDownload(lastModifyFile(), file(), contentLength, lastModify);
     }
 
     /**
@@ -105,7 +105,7 @@ public class TemporaryRecord {
      * @throws ParseException
      */
     public void prepareRangeDownload() throws IOException, ParseException {
-        fileHelper.prepareDownload(lastModifyFile(), tempFile(), file(), contentLength, lastModify);
+        this.fileHelper.prepareDownload(lastModifyFile(), tempFile(), file(), contentLength, lastModify);
     }
 
     /**
@@ -116,7 +116,7 @@ public class TemporaryRecord {
      * @throws IOException
      */
     public DownloadRange readDownloadRange(int index) throws IOException {
-        return fileHelper.readDownloadRange(tempFile(), index);
+        return this.fileHelper.readDownloadRange(tempFile(), index);
     }
 
     /**
@@ -126,7 +126,7 @@ public class TemporaryRecord {
      * @param response response
      */
     public void save(FlowableEmitter<DownloadStatus> e, Response<ResponseBody> response) {
-        fileHelper.saveFile(e, file(), response);
+        this.fileHelper.saveFile(e, file(), response);
     }
 
     /**
@@ -147,7 +147,7 @@ public class TemporaryRecord {
      * @return response
      */
     public Flowable<Response<ResponseBody>> download() {
-        return downloadApi.download(null, bean.getUrl());
+        return this.downloadApi.download(null, this.bean.getUrl());
     }
 
     /**
@@ -168,20 +168,20 @@ public class TemporaryRecord {
                 .flatMap((Function<DownloadRange, Publisher<Response<ResponseBody>>>) range -> {
                     Utils.log(RANGE_DOWNLOAD_STARTED, index, range.start, range.end);
                     String rangeStr = "bytes=" + range.start + "-" + range.end;
-                    return this.downloadApi.download(rangeStr, bean.getUrl());
+                    return this.downloadApi.download(rangeStr, this.bean.getUrl());
                 });
     }
 
     public int getMaxRetryCount() {
-        return maxRetryCount;
+        return this.maxRetryCount;
     }
 
     public int getMaxThreads() {
-        return maxThreads;
+        return this.maxThreads;
     }
 
     public boolean isSupportRange() {
-        return rangeSupport;
+        return this.rangeSupport;
     }
 
     public void setRangeSupport(boolean rangeSupport) {
@@ -189,7 +189,7 @@ public class TemporaryRecord {
     }
 
     public boolean isFileChanged() {
-        return serverFileChanged;
+        return this.serverFileChanged;
     }
 
     public void setFileChanged(boolean serverFileChanged) {
@@ -197,7 +197,7 @@ public class TemporaryRecord {
     }
 
     public long getContentLength() {
-        return contentLength;
+        return this.contentLength;
     }
 
     public void setContentLength(long contentLength) {
@@ -213,35 +213,35 @@ public class TemporaryRecord {
     }
 
     public void setSaveName(String saveName) {
-        bean.setSaveName(saveName);
+        this.bean.setSaveName(saveName);
     }
 
     public File file() {
-        return new File(filePath);
+        return new File(this.filePath);
     }
 
     public File tempFile() {
-        return new File(tempPath);
+        return new File(this.tempPath);
     }
 
     public File lastModifyFile() {
-        return new File(lmfPath);
+        return new File(this.lmfPath);
     }
 
     public boolean fileComplete() {
-        return file().length() == contentLength;
+        return file().length() == this.contentLength;
     }
 
     public boolean tempFileDamaged() throws IOException {
-        return fileHelper.tempFileDamaged(tempFile(), contentLength);
+        return this.fileHelper.tempFileDamaged(tempFile(), this.contentLength);
     }
 
     public String readLastModify() throws IOException {
-        return fileHelper.readLastModify(lastModifyFile());
+        return this.fileHelper.readLastModify(lastModifyFile());
     }
 
     public boolean fileNotComplete() throws IOException {
-        return fileHelper.fileNotComplete(tempFile());
+        return this.fileHelper.fileNotComplete(tempFile());
     }
 
     public File[] getFiles() {
@@ -250,27 +250,27 @@ public class TemporaryRecord {
 
 
     public void start() {
-        if (dataBaseHelper.recordNotExists(bean.getUrl())) {
-            dataBaseHelper.insertRecord(bean, STARTED);
+        if (this.dataBaseHelper.recordNotExists(this.bean.getUrl())) {
+            this.dataBaseHelper.insertRecord(this.bean, STARTED);
         } else {
-            dataBaseHelper.updateRecord(bean.getUrl(), bean.getSaveName(), bean.getSavePath(), STARTED);
+            this.dataBaseHelper.updateRecord(this.bean.getUrl(), this.bean.getSaveName(), this.bean.getSavePath(), STARTED);
         }
     }
 
     public void update(DownloadStatus status) {
-        dataBaseHelper.updateStatus(bean.getUrl(), status);
+        this.dataBaseHelper.updateStatus(this.bean.getUrl(), status);
     }
 
     public void error() {
-        dataBaseHelper.updateRecord(bean.getUrl(), FAILED);
+        this.dataBaseHelper.updateRecord(this.bean.getUrl(), FAILED);
     }
 
     public void complete() {
-        dataBaseHelper.updateRecord(bean.getUrl(), COMPLETED);
+        this.dataBaseHelper.updateRecord(this.bean.getUrl(), COMPLETED);
     }
 
     public void cancel() {
-        dataBaseHelper.updateRecord(bean.getUrl(), PAUSED);
+        this.dataBaseHelper.updateRecord(this.bean.getUrl(), PAUSED);
     }
 
     public void finish() {
