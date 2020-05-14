@@ -90,13 +90,13 @@ public class SingleMission extends DownloadMission {
 
     @Override
     public void start(final Semaphore semaphore) throws InterruptedException {
-        if (isCanceled()) {
+        if (this.isCanceled()) {
             return;
         }
 
         semaphore.acquire();
 
-        if (isCanceled()) {
+        if (this.isCanceled()) {
             semaphore.release();
             return;
         }

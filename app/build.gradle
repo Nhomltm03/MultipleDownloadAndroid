@@ -48,4 +48,8 @@ dependencies {
     implementation "com.github.ssseasonnn.RxDownload:rxdownload4-notification:1.0.9"
     implementation "com.github.ssseasonnn.RxDownload:rxdownload4-recorder:1.0.9"
 
+    implementation 'com.github.zagum:Android-SwitchIcon:1.4.0'
+
+    implementation 'com.afollestad.material-dialogs:core:3.3.0'
+
 }

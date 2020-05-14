@@ -27,7 +27,6 @@ import io.reactivex.ObservableTransformer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.processors.BehaviorProcessor;
 import io.reactivex.processors.FlowableProcessor;
-import okhttp3.internal.http.HttpHeaders;
 import retrofit2.HttpException;
 import retrofit2.Response;
 
@@ -156,7 +155,12 @@ public class Utils {
     }
 
     public static long contentLength(Response<?> response) {
-        return HttpHeaders.contentLength(response.headers());
+        try {
+            return Long.parseLong(response.headers().get(("Content-Length")));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     public static String fileName(String url, Response<?> response) {
